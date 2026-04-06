@@ -1,0 +1,373 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                     🐳 DOCKER MINI CLUSTER - COMMANDS REFERENCE            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 STARTUP COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Change to project directory
+cd ~/Downloads/test1
+
+# Start all containers (recommended)
+./start-cluster.sh
+
+# OR start manually
+docker compose up -d
+
+# Wait for stability
+sleep 10
+
+# Verify all containers running
+docker compose ps
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ STATUS & HEALTH CHECK COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Container status
+docker compose ps
+
+# Detailed container info
+docker compose ps -a
+
+# Health check all services
+docker compose logs | grep "health"
+
+# Manual health tests
+curl http://localhost/health              # Load Balancer
+curl http://localhost:8081/health         # Worker 1
+curl http://localhost:8082/health         # Worker 2
+
+# Run complete test suite
+./test-cluster.sh
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 LOG COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# View all logs (live stream)
+docker compose logs -f
+
+# Last 50 lines from all containers
+docker compose logs --tail 50
+
+# View specific service logs (live)
+docker compose logs -f loadbalancer
+docker compose logs -f worker1
+docker compose logs -f worker2
+docker compose logs -f jenkins
+docker compose logs -f master
+
+# Find specific error in logs
+docker compose logs | grep "ERROR"
+
+# Get timestamp logs
+docker compose logs --timestamps
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 TESTING COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Test load balancer round-robin (should alternate)
+for i in {1..6}; do
+  echo "Request $i:"
+  curl -s http://localhost | grep -o "Docker Mini"
+done
+
+# Direct worker tests
+curl http://localhost:8081       # Worker 1 directly
+curl http://localhost:8082       # Worker 2 directly
+
+# Test from inside container
+docker exec loadbalancer curl http://worker1:80/
+docker exec loadbalancer curl http://worker2:80/
+
+# Quick connectivity test
+docker exec loadbalancer ping -c 3 worker1
+docker exec loadbalancer ping -c 3 worker2
+
+# Test Jenkins
+curl http://localhost:8080
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 PERFORMANCE TESTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Install Apache Bench (if needed)
+sudo apt-get install apache2-utils
+
+# Single request test
+curl -i http://localhost/
+
+# 100 requests, 10 concurrent
+ab -n 100 -c 10 http://localhost/
+
+# 1000 requests, 50 concurrent (heavy load)
+ab -n 1000 -c 50 http://localhost/
+
+# Include timing details
+ab -n 100 -c 10 -v http://localhost/
+
+# Monitor resource usage during load test
+docker stats
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 RESTART & MAINTENANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Restart all containers
+docker compose restart
+
+# Restart specific service
+docker compose restart jenkins
+docker compose restart loadbalancer
+docker compose restart worker1
+
+# Stop all (keep data)
+docker compose stop
+
+# Stop all and remove containers
+docker compose down
+
+# Stop and remove everything (INCLUDING volumes - DATA LOSS!)
+docker compose down -v
+
+# Full rebuild
+docker compose down
+docker compose up -d
+
+# Rebuild images (if code changed)
+docker compose up -d --build
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 DOCKER RESOURCE MONITORING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Real-time resource usage
+docker stats
+
+# Resource usage snapshot
+docker stats --no-stream
+
+# Volume list and usage
+docker volume ls
+
+# Total disk usage
+docker system df
+
+# Container processes
+docker compose ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Image list
+docker images
+
+# Network list
+docker network ls
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 NETWORK & CONNECTIVITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# List all networks
+docker network ls
+
+# Inspect cluster network
+docker network inspect test1_cluster_network
+
+# Test inter-container connectivity
+docker exec worker1 ping -c 3 worker2
+docker exec worker1 ping -c 3 loadbalancer
+
+# DNS resolution test (inside container)
+docker exec loadbalancer nslookup worker1
+docker exec loadbalancer nslookup worker2
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🐚 CONTAINER SHELL ACCESS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Enter container shell
+docker exec -it loadbalancer bash
+docker exec -it worker1 bash
+docker exec -it jenkins bash
+docker exec -it master bash
+
+# Run command inside container
+docker exec jenkins curl http://localhost:8080
+docker exec loadbalancer curl http://worker1:80/health
+
+# Copy files from container
+docker cp jenkins:/var/jenkins_home/config.xml ./jenkins-backup.xml
+
+# Copy files to container
+docker cp ./myfile.txt jenkins:/var/jenkins_home/
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔄 GITHUB AUTOMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Start ngrok tunnel (separate terminal)
+ngrok http 8080
+
+# Test GitHub webhook delivery
+# Go to: https://github.com/YOUR_REPO/settings/hooks
+# Click "Recent Deliveries" tab to see webhook logs
+
+# Manual git commands
+cd ~/Downloads/test1
+git add .
+git commit -m "Message"
+git push origin main
+
+# View Jenkins build job
+http://localhost:8080/job/devops-mini-cluster/
+
+# Trigger manual build
+http://localhost:8080/job/devops-mini-cluster/build
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🛠️ TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Port already in use
+sudo lsof -i :80        # Find what's using port 80
+sudo kill -9 <PID>      # Kill process
+
+# Container keeps restarting
+docker compose logs worker1      # Check why it's failing
+docker compose restart worker1   # Restart it
+
+# No connectivity between containers
+docker inspect test1_cluster_network    # Check network config
+docker network connect test1_cluster_network <container>  # Reconnect
+
+# Docker daemon issues
+sudo systemctl restart docker   # Restart Docker
+docker version                  # Verify Docker works
+
+# Jenkins can't access Docker
+docker exec -u root jenkins usermod -aG docker jenkins
+docker compose restart jenkins
+
+# Disk space issues
+docker system prune -a          # Remove unused images/containers
+docker volume prune             # Remove unused volumes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 INFO & INSPECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Docker version information
+docker version
+
+# Docker Compose version
+docker compose version
+
+# Container detailed info
+docker inspect <container-name>
+
+# Image history
+docker history jenkins:lts
+
+# Check docker-compose.yml validity
+docker compose config
+
+# Environment variables in container
+docker exec jenkins env
+
+# Running processes in container
+docker exec loadbalancer ps aux
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💾 BACKUP & CLEANUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Backup Jenkins data
+docker exec jenkins tar czf - /var/jenkins_home > jenkins-backup.tar.gz
+
+# Clean up disk space (CAREFUL!)
+docker system prune          # Remove unused resources
+docker container prune       # Remove stopped containers
+docker image prune          # Remove unused images
+docker volume prune         # Remove unused volumes
+
+# Full cleanup (DESTRUCTIVE!)
+docker compose down -v      # Remove everything including data!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 QUICK SCENARIOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✏️  SCENARIO 1: Daily Startup
+┌─────────────────────────────────────────────────────────────────┐
+│ cd ~/Downloads/test1                                            │
+│ ./start-cluster.sh                                              │
+│ # Everything starts automatically ✅                            │
+└─────────────────────────────────────────────────────────────────┘
+
+✏️  SCENARIO 2: Full Testing
+┌─────────────────────────────────────────────────────────────────┐
+│ cd ~/Downloads/test1                                            │
+│ ./start-cluster.sh          # Terminal 1                        │
+│ ./test-cluster.sh           # Terminal 2                        │
+│ # All tests run automatically ✅                               │
+└─────────────────────────────────────────────────────────────────┘
+
+✏️  SCENARIO 3: GitHub Webhook Testing
+┌─────────────────────────────────────────────────────────────────┐
+│ ngrok http 8080             # Terminal 1                        │
+│ ./start-cluster.sh          # Terminal 2                        │
+│ git push origin main        # Terminal 3                        │
+│ # Jenkins auto-builds! Watch at http://localhost:8080          │
+└─────────────────────────────────────────────────────────────────┘
+
+✏️  SCENARIO 4: Performance Testing
+┌─────────────────────────────────────────────────────────────────┐
+│ ./start-cluster.sh                                              │
+│ docker stats                # Terminal 1 (monitor resources)   │
+│ ab -n 1000 -c 50 http://localhost/  # Terminal 2 (load test)   │
+│ # See load balancing & performance metrics                      │
+└─────────────────────────────────────────────────────────────────┘
+
+✏️  SCENARIO 5: Troubleshooting
+┌─────────────────────────────────────────────────────────────────┐
+│ docker compose ps           # Check status                      │
+│ docker compose logs -f      # View logs live                    │
+│ curl http://localhost/health     # Test connectivity           │
+│ ./test-cluster.sh           # Run full test suite              │
+└─────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📖 DOCUMENTATION FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+README.md              - Project overview & architecture
+QUICK_START.md         - Quick reference for common tasks
+SETUP_AND_TEST.md      - Complete setup & testing guide
+COMMANDS_REFERENCE.txt - This file (all commands)
+docker-compose.yml     - Service definitions
+Jenkinsfile            - CI/CD pipeline
+
+Script files:
+start-cluster.sh       - One-command startup
+test-cluster.sh        - Complete test suite
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                   🚀 START HERE: ./start-cluster.sh                        ║
+╚════════════════════════════════════════════════════════════════════════════╝
