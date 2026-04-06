@@ -10,7 +10,7 @@ pipeline {
 
     environment {
         DOCKER_COMPOSE_VERSION = '2.0'
-        PROJECT_NAME = 'docker-mini-cluster'
+        PROJECT_NAME = 'devops_mini_project'
         GIT_BRANCH = 'main'
     }
 
@@ -24,7 +24,7 @@ pipeline {
                             $class: 'GitSCM',
                             branches: [[name: "*/${GIT_BRANCH}"]],
                             userRemoteConfigs: [[
-                                url: 'https://github.com/antiquark007/docker-mini-cluster.git'
+                                url: 'https://github.com/antiquark007/devops_mini_project'
                             ]]
                         ])
                         echo "✅ Code checked out successfully!"
