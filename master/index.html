@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Mini Cluster - Load Balancer Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+        }
+        .worker-info {
+            background: #f0f0f0;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+        .worker-id {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+        .refresh-hint {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 30px;
+        }
+        .features {
+            margin-top: 40px;
+            text-align: left;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .features h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        .features li {
+            padding: 8px 0;
+            color: #555;
+            border-bottom: 1px solid #eee;
+        }
+        .features li:last-child {
+            border-bottom: none;
+        }
+        .features li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐳 Docker Mini Cluster</h1>
+        <div class="subtitle">Load Balancer Round-Robin Demo</div>
+        
+        <div class="worker-info">
+            You are accessing: <span class="worker-id" id="worker-name">Loading...</span>
+        </div>
+        
+        <div class="refresh-hint">💡 Refresh the page multiple times to see the load balancer route your requests to different workers!</div>
+        
+        <div class="features">
+            <h3>🚀 This Setup Demonstrates:</h3>
+            <ul>
+                <li>Docker containerized applications</li>
+                <li>NGINX round-robin load balancing</li>
+                <li>Shared Docker volumes</li>
+                <li>CI/CD with Jenkins pipeline</li>
+                <li>Multi-container orchestration</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Extract worker ID from hostname
+        const hostname = window.location.hostname;
+        const workerName = document.getElementById('worker-name');
+        
+        // Simple worker identification based on port
+        const port = window.location.port;
+        let worker = 'Unknown Worker';
+        
+        if (!port || port === '80') {
+            worker = 'Worker via Load Balancer';
+        } else if (port === '8081') {
+            worker = 'Worker 1 (Direct)';
+        } else if (port === '8082') {
+            worker = 'Worker 2 (Direct)';
+        }
+        
+        workerName.textContent = worker;
+        workerName.style.fontSize = '1.4em';
+    </script>
+</body>
+</html>

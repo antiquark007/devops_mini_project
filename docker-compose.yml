@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  master:
+    image: ubuntu:22.04
+    container_name: master
+    command: >
+      bash -c "
+        apt-get update -qq &&
+        apt-get install -y -qq curl > /dev/null 2>&1 &&
+        mkdir -p /var/www/html &&
+        cp -f /docker-entrypoint/index.html /var/www/html/ &&
+        echo 'Master container running - press Ctrl+C to stop' &&
+        tail -f /dev/null
+      "
+    volumes:
+      - ./master:/docker-entrypoint:ro
+      - web_content:/var/www/html
+    networks:
+      - cluster_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "test", "-f", "/var/www/html/index.html"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  worker1:
+    image: nginx:latest
+    container_name: worker1
+    ports:
+      - "8081:80"
+    volumes:
+      - ./worker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - web_content:/var/www/html:ro
+    networks:
+      - cluster_network
+    restart: unless-stopped
+    depends_on:
+      master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  worker2:
+    image: nginx:latest
+    container_name: worker2
+    ports:
+      - "8082:80"
+    volumes:
+      - ./worker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - web_content:/var/www/html:ro
+    networks:
+      - cluster_network
+    restart: unless-stopped
+    depends_on:
+      master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  loadbalancer:
+    image: nginx:latest
+    container_name: loadbalancer
+    ports:
+      - "80:80"
+    volumes:
+      - ./loadbalancer/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - cluster_network
+    restart: unless-stopped
+    depends_on:
+      - worker1
+      - worker2
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+      - JENKINS_OPTS=--argumentsRealm.passwd.admin=admin --argumentsRealm.roles.admin=admin
+    networks:
+      - cluster_network
+    restart: unless-stopped
+    user: root
+
+volumes:
+  web_content:
+    driver: local
+  jenkins_home:
+    driver: local
+
+networks:
+  cluster_network:
+    driver: bridge
