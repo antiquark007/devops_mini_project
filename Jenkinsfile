@@ -24,7 +24,7 @@ pipeline {
                             $class: 'GitSCM',
                             branches: [[name: "*/${GIT_BRANCH}"]],
                             userRemoteConfigs: [[
-                                url: 'https://github.com/YOUR_USERNAME/docker-mini-cluster.git'
+                                url: 'https://github.com/antiquark007/docker-mini-cluster.git'
                             ]]
                         ])
                         echo "✅ Code checked out successfully!"
