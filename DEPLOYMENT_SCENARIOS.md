@@ -503,8 +503,6 @@ kubectl get all -n mini-cluster
 kubectl port-forward -n mini-cluster svc/loadbalancer-service 8000:80
 # Open browser: http://localhost:8000
 
-# 3. Show load balancing (1 min)
-# Refresh multiple times, show round-robin
 
 # 4. Show Jenkins (1 min)
 kubectl port-forward -n mini-cluster svc/jenkins-service 8080:8080
