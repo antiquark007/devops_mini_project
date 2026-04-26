@@ -46,7 +46,6 @@ Real-world scenarios and how to use this project.
    # Rebuild and redeploy
    ```
 
-**Time:** 5 days, 1-2 hours/day  
 **Skills Gained:** Docker, Docker Compose, NGINX, Jenkins basics
 
 ---
