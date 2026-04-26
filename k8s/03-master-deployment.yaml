@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: master
+  namespace: mini-cluster
+  labels:
+    app: master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: master
+  template:
+    metadata:
+      labels:
+        app: master
+    spec:
+      containers:
+      - name: master
+        image: ubuntu:22.04
+        command:
+          - /bin/sh
+          - -c
+          - |
+            apt-get update -qq
+            apt-get install -y -qq curl > /dev/null 2>&1
+            echo "Master container running"
+            tail -f /dev/null
+        volumeMounts:
+        - name: html-volume
+          mountPath: /var/www/html
+          readOnly: false
+        livenessProbe:
+          exec:
+            command:
+            - test
+            - -f
+            - /var/www/html/index.html
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+      volumes:
+      - name: html-volume
+        emptyDir: {}
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: master-service
+  namespace: mini-cluster
+spec:
+  selector:
+    app: master
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  type: ClusterIP
