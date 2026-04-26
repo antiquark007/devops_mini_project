@@ -46,7 +46,6 @@ Real-world scenarios and how to use this project.
    # Rebuild and redeploy
    ```
 
-**Skills Gained:** Docker, Docker Compose, NGINX, Jenkins basics
 
 ---
 
