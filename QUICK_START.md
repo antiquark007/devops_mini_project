@@ -85,7 +85,6 @@ http://localhost:8080
 ### Terminal 1: Start ngrok
 ```bash
 ngrok http 8080
-# Copy the HTTPS URL
 ```
 
 ### Terminal 2: Start cluster
