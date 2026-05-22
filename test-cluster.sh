@@ -7,7 +7,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-PROJECT_DIR=~/Downloads/test1
+# Project directory (use script location as project root)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$SCRIPT_DIR"
 cd "$PROJECT_DIR" || exit
 
 print_success() { echo -e "${GREEN}✅ $1${NC}"; }
