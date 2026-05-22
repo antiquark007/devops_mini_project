@@ -1,0 +1,35 @@
+name: devops-mini
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - curl
+  - docker-compose
+  - pytest
+  - requests
+  - pyyaml
+  - pip:
+    - kubernetes        # Python client (for scripting/testing K8s APIs)
+    - python-dotenv
+
+# Notes:
+# - `kubectl` (the Kubernetes CLI) isn't reliably available from the default
+#   conda channels for all platforms. Install `kubectl` on the host instead.
+#
+# Install `kubectl` on Linux (recommended):
+#
+#   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+#   chmod +x kubectl
+#   sudo mv kubectl /usr/local/bin/
+#
+# Or use your package manager (example: Debian/Ubuntu):
+#
+#   sudo apt-get update && sudo apt-get install -y kubectl
+#
+# Create the environment:
+#
+#   conda env create -f environment.yml
+#   conda activate devops-mini
+

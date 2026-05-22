@@ -87,6 +87,9 @@ ghhdcghjhfejdhc
 ngrok http 8080
 ```
 
+Current tunnel URL:
+`https://heretically-elliptical-werner.ngrok-free.dev`
+
 ### Terminal 2: Start cluster
 ```bash
 ~/Downloads/test1/start-cluster.sh
@@ -94,9 +97,10 @@ ngrok http 8080
 
 ### GitHub Webhook Setup
 1. https://github.com/antiquark007/devops_mini_project/settings/hooks
-2. **Payload URL:** `https://your-ngrok-url.ngrok-free.dev/github-webhook/`
+2. **Payload URL:** `https://heretically-elliptical-werner.ngrok-free.dev/github-webhook/`
 3. **Events:** ✅ Just push
 4. Click **Add webhook**
+5. Make sure the Jenkins job uses this repo's `Jenkinsfile` and has the GitHub push trigger enabled.
 
 ### Test Automated Build
 ```bash
@@ -188,6 +192,8 @@ git push origin main
 
 # 5. Watch Jenkins auto-build at http://localhost:8080
 # 6. Cluster auto-deploys!
+
+Note: if ngrok restarts, the public URL may change and the webhook payload URL must be updated.
 ```
 
 ---
