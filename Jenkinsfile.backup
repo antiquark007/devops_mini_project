@@ -147,12 +147,15 @@ pipeline {
                 }
             }
         }
+4:29 AM 5/23/26
 
         stage('Test Access') {
             steps {
                 script {
                     echo "🌐 Testing service accessibility..."
-                    sh '''
+                    sh '''4:29 AM4:29 AM 5/23/26
+ 5/23/26
+
                         echo "Testing services..."
                         echo "Load Balancer: http://localhost"
                         echo "Worker 1: http://localhost:8081"
